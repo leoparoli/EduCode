@@ -1,11 +1,12 @@
-# =========================
 # Etapa de compilación
-# =========================
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 
-# Copiar todos los archivos .csproj
+# Copiar configuración global de .NET
+COPY Directory.Build.props ./
+
+# Copiar archivos de proyecto
 COPY src/EduCode.WebApi/EduCode.WebApi.csproj src/EduCode.WebApi/
 COPY src/EduCode.Aplicacion/EduCode.Aplicacion.csproj src/EduCode.Aplicacion/
 COPY src/EduCode.AccesoDatos/EduCode.AccesoDatos.csproj src/EduCode.AccesoDatos/
@@ -19,25 +20,27 @@ RUN dotnet restore src/EduCode.WebApi/EduCode.WebApi.csproj
 # Copiar todo el código fuente
 COPY src/ src/
 
+# Compilar
+RUN dotnet build src/EduCode.WebApi/EduCode.WebApi.csproj \
+    -c Release \
+    --no-restore
+
 # Publicar
 RUN dotnet publish src/EduCode.WebApi/EduCode.WebApi.csproj \
     -c Release \
-    -o /app/publish \
-    --no-restore
+    --no-restore \
+    -o /app/publish
 
-
-# =========================
-# Etapa de ejecución
-# =========================
+# Etapa final
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 
 WORKDIR /app
 
+# Copiar publicación
 COPY --from=build /app/publish .
 
-# Azure Container Apps escucha en el puerto 8080
-ENV ASPNETCORE_URLS=http://+:8080
-
+# Puerto utilizado por Azure Container Apps
 EXPOSE 8080
 
+# Iniciar API
 ENTRYPOINT ["dotnet", "EduCode.WebApi.dll"]
