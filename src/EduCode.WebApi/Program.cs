@@ -66,7 +66,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddSingleton<IColaFeedbackIA, ColaFeedbackIA>();
+
 builder.Services.AddHostedService<TrabajadorFeedbackIA>();
 
 // ======================================================
@@ -162,16 +164,22 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // ======================================================
-// ENTORNO DE DESARROLLO
+// INICIALIZACIÓN DE DATOS
 // ======================================================
+
+// La inicialización de datos solamente se ejecuta
+// durante el desarrollo local.
+//
+// NO se ejecuta automáticamente en Azure/Producción.
 
 if (app.Environment.IsDevelopment())
 {
     using IServiceScope scope =
         app.Services.CreateScope();
 
-    EduCodeContext contexto = scope.ServiceProvider
-        .GetRequiredService<EduCodeContext>();
+    EduCodeContext contexto =
+        scope.ServiceProvider
+            .GetRequiredService<EduCodeContext>();
 
     IServicioPassword servicioPassword =
         scope.ServiceProvider
@@ -180,25 +188,32 @@ if (app.Environment.IsDevelopment())
     await InicializadorDatos.InicializarAsync(
         contexto,
         servicioPassword);
-
-    app.UseSwagger();
-
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint(
-            "/swagger/v1/swagger.json",
-            "EduCode API v1");
-
-        options.RoutePrefix = "swagger";
-
-        options.DocumentTitle =
-            "EduCode API - Documentación";
-
-        options.DisplayRequestDuration();
-
-        options.EnablePersistAuthorization();
-    });
 }
+
+// ======================================================
+// SWAGGER
+// ======================================================
+
+// Swagger queda disponible tanto en Development
+// como en Production/Azure.
+
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "EduCode API v1");
+
+    options.RoutePrefix = "swagger";
+
+    options.DocumentTitle =
+        "EduCode API - Documentación";
+
+    options.DisplayRequestDuration();
+
+    options.EnablePersistAuthorization();
+});
 
 // ======================================================
 // MIDDLEWARES
@@ -212,6 +227,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 // ======================================================
