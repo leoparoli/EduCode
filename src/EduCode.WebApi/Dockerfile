@@ -5,16 +5,18 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 
-# Copiar los archivos .csproj
+# Copiar todos los archivos .csproj
 COPY src/EduCode.WebApi/EduCode.WebApi.csproj src/EduCode.WebApi/
 COPY src/EduCode.Aplicacion/EduCode.Aplicacion.csproj src/EduCode.Aplicacion/
 COPY src/EduCode.AccesoDatos/EduCode.AccesoDatos.csproj src/EduCode.AccesoDatos/
 COPY src/EduCode.Infraestructura/EduCode.Infraestructura.csproj src/EduCode.Infraestructura/
+COPY src/EduCode.Dominio/EduCode.Dominio.csproj src/EduCode.Dominio/
+COPY src/EduCode.DTOs/EduCode.DTOs.csproj src/EduCode.DTOs/
 
 # Restaurar dependencias
 RUN dotnet restore src/EduCode.WebApi/EduCode.WebApi.csproj
 
-# Copiar el código fuente
+# Copiar todo el código fuente
 COPY src/ src/
 
 # Publicar
@@ -33,7 +35,7 @@ WORKDIR /app
 
 COPY --from=build /app/publish .
 
-# Puerto utilizado por Azure Container Apps
+# Azure Container Apps escucha en el puerto 8080
 ENV ASPNETCORE_URLS=http://+:8080
 
 EXPOSE 8080
