@@ -1,0 +1,94 @@
+@host = https://localhost:7168
+@token = PEGAR_ACCESS_TOKEN
+@refreshToken = PEGAR_REFRESH_TOKEN
+
+### Registrar alumno
+POST {{host}}/api/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Leonardo",
+  "apellido": "Paroli",
+  "nombreUsuario": "leoparoli",
+  "email": "leonardo@example.com",
+  "password": "Password123!",
+  "confirmacionPassword": "Password123!"
+}
+
+### Login del administrador inicial
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "emailONombreUsuario": "admin@educode.local",
+  "password": "Admin123!"
+}
+
+### Renovar token
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Listar temas y progreso del alumno
+GET {{host}}/api/temas/curso/1
+Authorization: Bearer {{token}}
+
+### Obtener ejercicio
+GET {{host}}/api/ejercicios/1
+Authorization: Bearer {{token}}
+
+### Enviar intento
+POST {{host}}/api/ejercicios/1/intentos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "codigo": "let nombre = 'Leonardo'; console.log(nombre);",
+  "tiempoResolucionSegundos": 90
+}
+
+### Consultar progreso
+GET {{host}}/api/progreso/mi-progreso
+Authorization: Bearer {{token}}
+
+### Estado de evaluación local y proveedores de tutoría
+GET {{EduCode.WebApi_HostAddress}}/api/inteligencia-artificial/estado
+Authorization: Bearer {{accessToken}}
+
+### El envío devuelve inmediatamente la evaluación local
+POST {{EduCode.WebApi_HostAddress}}/api/ejercicios/27/intentos
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "ejercicioId": 34,
+  "codigo": "function contarVocales(texto) { let cantidad = 0; texto = texto.toLowerCase(); for (let i = 0; i <= texto.length; i++) { if ('aeiou'.includes(texto[i])) cantidad++; } return cantidad; }",
+  "tiempoResolucionSegundos": 90
+}
+
+### Estado del Tutor IA
+GET {{host}}/api/tutor-ia/estado
+Authorization: Bearer {{token}}
+
+### Consulta válida al Tutor IA
+POST {{host}}/api/tutor-ia/consultar
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "consulta": "¿Cómo puedo verificar si un texto contiene un guion?",
+  "historial": []
+}
+
+### Consulta fuera del curso: se rechaza localmente y no consume tokens
+POST {{host}}/api/tutor-ia/consultar
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "consulta": "¿Quién ganó el último partido de fútbol?",
+  "historial": []
+}
