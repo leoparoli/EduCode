@@ -7,11 +7,6 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    
-    # Esto ubica el entorno exactamente en la carpeta donde está tu Dockerfile
-    defaults:
-      run:
-        working-directory: ./EduCode Version 3.1.3 Azure Email/EduCode.API
 
     steps:
       - name: Checkout repository
@@ -23,8 +18,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
-        run: docker build -t leoparoli/educode-api:latest .
-
-      - name: Push Docker image
-        run: docker push leoparoli/educode-api:latest
+      - name: Build and push Docker image
+        run: |
+          cd "EduCode Version 3.1.3 Azure Email/EduCode.API"
+          docker build -t leoparoli/educode-api:latest .
+          docker push leoparoli/educode-api:latest
